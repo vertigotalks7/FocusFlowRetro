@@ -41,7 +41,7 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
 
 
 export default function Home() {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [musicStreams, setMusicStreams] = useState<Station[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [volume, setVolume] = useState(0.5);
@@ -98,13 +98,20 @@ export default function Home() {
     if (musicStreams.length > 0 && typeof window !== 'undefined') {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current = null;
       }
       const currentTrack = musicStreams[currentTrackIndex];
       if (currentTrack) {
-        audioRef.current = new Audio(currentTrack.url);
-        audioRef.current.volume = volume;
+        const audio = new Audio(currentTrack.url);
+        audio.volume = volume;
+        audioRef.current = audio;
+        
         if (isPlaying) {
-          audioRef.current?.play().catch(e => console.error("Audio play failed:", e));
+          audio.play().catch(e => {
+            console.error("Audio play failed:", e);
+            // Autoplay was prevented.
+            setIsPlaying(false);
+          });
         }
       }
     }
@@ -117,13 +124,17 @@ export default function Home() {
   }, [volume]);
 
   const togglePlay = () => {
-    if (musicStreams.length === 0) return;
+    if (musicStreams.length === 0 || !audioRef.current) return;
     setIsPlaying(prev => !prev);
   }
 
   useEffect(() => {
+    if (!audioRef.current) return;
     if (isPlaying) {
-      audioRef.current?.play().catch(e => console.error("Audio play failed:", e));
+      audioRef.current?.play().catch(e => {
+        console.error("Audio play failed:", e)
+        setIsPlaying(false);
+      });
     } else {
       audioRef.current?.pause();
     }
