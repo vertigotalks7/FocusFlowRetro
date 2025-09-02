@@ -129,7 +129,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (!playerRef.current) return;
+    if (!isStarted || !playerRef.current) return;
     if (isPlaying) {
       playerRef.current.playVideo();
     } else {
