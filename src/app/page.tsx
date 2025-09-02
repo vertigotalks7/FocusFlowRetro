@@ -75,30 +75,16 @@ export default function Home() {
 
 
   useEffect(() => {
-    async function fetchStations() {
-      setIsLoading(true);
-      try {
-        const response = await fetch('https://de1.api.radio-browser.info/json/stations/bytag/lofi');
-        const data = await response.json();
-        const stations: Station[] = data
-            .filter(station => station.url_resolved && station.codec === 'mp3')
-            .map(station => ({
-                name: station.name,
-                url: station.url_resolved,
-            }))
-            .slice(0, 20); // Limit to 20 stations
-        
-        if (stations.length > 0) {
-            setMusicStreams(stations);
-            setCurrentTrackIndex(0);
-        }
-      } catch (error) {
-        console.error("Failed to fetch radio stations:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchStations();
+    const stations: Station[] = [
+      { name: 'Lofi Girl - beats to relax/study to', url: 'https://stream.zeno.fm/f835fidaetpuv' },
+      { name: 'Chillhop Radio - jazzy & lofi hip hop beats', url: 'https://stream.zeno.fm/upt3dhjfo88uv' },
+      { name: 'lofi hip hop radio - beats to sleep/chill to', url: 'https://stream.zeno.fm/3614uhw84p8uv' },
+      { name: 'The Bootleg Boy - 24/7 lofi hip hop radio', url: 'https://stream.zeno.fm/1zwd365gretuv' },
+      { name: 'Radio Spinner - Lo-Fi', url: 'https://streams.radiospinner.com/lofi-hip-hop-free' },
+    ];
+    setMusicStreams(stations);
+    setCurrentTrackIndex(Math.floor(Math.random() * stations.length));
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
