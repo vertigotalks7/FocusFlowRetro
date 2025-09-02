@@ -84,7 +84,7 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'SYNTHWAVE Radio 24/7', id: '2pDiJvbaw6E' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -183,7 +183,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-purple-900/50 -z-10" />
 
         {!isStarted && (
-           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/50 cursor-pointer">
+           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/50 cursor-pointer" onClick={handleFirstInteraction} onKeyDown={handleFirstInteraction} tabIndex={0}>
              <h1 className="text-4xl font-headline text-shadow-neon-accent mb-4 animate-pulse">FocusFlow Retro</h1>
              <p className="text-lg">Click or Press any key to begin</p>
            </div>
