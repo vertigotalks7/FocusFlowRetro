@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
 import YouTube from 'react-youtube';
 import type { YouTubePlayer } from 'react-youtube';
+import { cn } from '@/lib/utils';
 
 const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
   if (!enabled) return null;
@@ -15,8 +16,9 @@ const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
 
 const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   const [lines, setLines] = useState<string[]>([]);
+  const [progress, setProgress] = useState(0);
   const [showPrompt, setShowPrompt] = useState(false);
-  
+
   const bootSequence = [
     "INITIALIZING FFS-1984...",
     "VIRTUAL BIOS v2.3.1",
@@ -31,39 +33,67 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   ];
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index < bootSequence.length) {
-          setLines(prev => [...prev, bootSequence[index]]);
-          index++;
-        } else {
-          clearInterval(interval);
-          setTimeout(() => {
-            setShowPrompt(true);
-            onFinished();
-          }, 500);
-        }
-      }, 300);
-      return () => clearInterval(interval);
-    }, 500);
-    return () => clearTimeout(timer);
+    let lineIndex = 0;
+    const lineInterval = setInterval(() => {
+      if (lineIndex < bootSequence.length) {
+        setLines(prev => [...prev, bootSequence[lineIndex]]);
+        lineIndex++;
+      } else {
+        clearInterval(lineInterval);
+        const progressInterval = setInterval(() => {
+          setProgress(p => {
+            if (p >= 100) {
+              clearInterval(progressInterval);
+              setTimeout(() => {
+                setShowPrompt(true);
+                onFinished();
+              }, 500);
+              return 100;
+            }
+            return p + 2;
+          });
+        }, 50);
+      }
+    }, 200);
+
+    return () => {
+      clearInterval(lineInterval);
+    };
   }, [onFinished]);
 
+  const progressBar = `[${'█'.repeat(progress / 4)}${'░'.repeat(25 - progress / 4)}] ${progress}%`;
+
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/70">
-       <div className="font-mono text-lg text-primary text-left p-4 max-w-xl w-full">
-         {lines.map((line, i) => (
-           <p key={i}>
-             <span className="text-accent">&gt;</span> {line}
-           </p>
-         ))}
-         {showPrompt && (
-            <p className="text-xl text-center mt-8 animate-pulse">
-                Click or Press any key to begin
-            </p>
-         )}
-       </div>
+    <div className="absolute inset-0 z-10 bg-black/70 flex items-end md:items-start justify-center md:justify-start p-4 md:p-8">
+      <div className="font-mono text-sm md:text-base text-primary w-full max-w-lg md:max-w-2xl bg-black/50 p-4 rounded-lg border border-primary/20">
+        <pre className="text-accent text-xs md:text-sm whitespace-pre-wrap mb-4">
+{`
+    ██╗░░██╗██╗██╗░░░██╗██████╗░░█████╗░
+    ██║░░██║██║╚██╗░██╔╝██╔══██╗██╔══██╗
+    ███████║██║░╚████╔╝░██║░░██║██║░░██║
+    ██╔══██║██║░░╚██╔╝░░██║░░██║██║░░██║
+    ██║░░██║██║░░░██║░░░██████╔╝╚█████╔╝
+    ╚═╝░░╚═╝╚═╝░░░╚═╝░░░╚═════╝░░╚════╝░
+    .... FOCUSFLOW SYSTEM v1.9.8.4 ....
+`}
+        </pre>
+        {lines.map((line, i) => (
+          <p key={i}>
+            <span className="text-accent">&gt;</span> {line}
+          </p>
+        ))}
+        {lines.length === bootSequence.length && (
+          <div>
+            <p><span className="text-accent">&gt;</span> FINALIZING...</p>
+            <p className="mt-2">{progressBar}</p>
+          </div>
+        )}
+        {showPrompt && (
+          <p className="text-lg text-center mt-4 animate-pulse">
+            Click or Press any key to begin
+          </p>
+        )}
+      </div>
     </div>
   );
 };
@@ -89,7 +119,7 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
         <Volume2 className="text-primary" />
         <Slider value={[volume]} onValueChange={(value) => setVolume(value[0])} max={100} step={1} disabled={isLoading} />
       </div>
-      <div className={`flex-grow flex items-center gap-2 ${glitchClass}`}>
+      <div className={cn("flex-grow flex items-center gap-2", glitchClass)}>
         {isLoading ? <Loader size={20} className="text-primary animate-spin" /> : <ListMusic size={20} className="text-primary" />}
         <p className="truncate">{isLoading ? "Finding vibes..." : currentTrack?.name || "No station selected"}</p>
       </div>
@@ -187,7 +217,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || !isStarted) return;
     if (isPlaying) {
       playerRef.current.playVideo();
     } else {
