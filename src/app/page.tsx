@@ -52,7 +52,7 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
             }
             return p + 4;
           });
-        }, 50);
+        }, 80);
       }
     }, 150);
 
@@ -102,6 +102,8 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 interface Station {
   name: string;
   id: string; // YouTube Video ID
+  imageUrl: string;
+  imageHint: string;
 }
 
 const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
@@ -137,15 +139,9 @@ export default function Home() {
   const [listeners, setListeners] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
-  const [imageUrl, setImageUrl] = useState("https://picsum.photos/1920/1080");
   const [canStart, setCanStart] = useState(false);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
-  
-  const updateImageUrl = () => {
-    const newImageUrl = `https://picsum.photos/1920/1080?random=${Math.random()}`;
-    setImageUrl(newImageUrl);
-  };
 
   const handleFirstInteraction = useCallback(() => {
     if (!canStart || isStarted) return;
@@ -171,7 +167,8 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://picsum.photos/1920/1080?random=1', imageHint: 'morning sunrise' },
+      { name: 'Nightride - 1 A.M Study Session', id: 'UI5NKkW8acM', imageUrl: 'https://picsum.photos/1920/1080?random=2', imageHint: 'night city' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -230,7 +227,6 @@ export default function Home() {
     setGlitchClass('glitch-active');
     setTimeout(() => setGlitchClass(''), 300);
     setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
-    updateImageUrl();
   };
   
   const currentStation = musicStreams[currentTrackIndex];
@@ -256,18 +252,21 @@ export default function Home() {
                      nextTrack();
                   }
                 }}
+                key={currentStation.id}
               />
            )}
          </div>
-         <Image 
-          src={imageUrl}
-          alt="Retro car interior view with palm trees"
-          fill
-          quality={85}
-          className="object-cover -z-10 transition-opacity duration-1000"
-          key={imageUrl}
-          data-ai-hint="retro vaporwave"
-         />
+         {currentStation && (
+          <Image 
+            src={currentStation.imageUrl}
+            alt="Retro background"
+            fill
+            quality={85}
+            className="object-cover -z-10 transition-opacity duration-1000"
+            key={currentStation.imageUrl}
+            data-ai-hint={currentStation.imageHint}
+          />
+         )}
         <div className="absolute inset-0 bg-purple-900/50 -z-10" />
 
         {!isStarted && <TerminalLoader onFinished={() => setCanStart(true)} />}
