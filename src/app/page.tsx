@@ -13,6 +13,62 @@ const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
   return <div className="vhs-overlay fixed inset-0 pointer-events-none z-50" />;
 };
 
+const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
+  const [lines, setLines] = useState<string[]>([]);
+  const [showPrompt, setShowPrompt] = useState(false);
+  
+  const bootSequence = [
+    "INITIALIZING FFS-1984...",
+    "VIRTUAL BIOS v2.3.1",
+    "CPU: SYNTHWAVE-8086 @ 4.77MHz",
+    "MEMORY: 640KB OK",
+    "LOADING VIBE OS...",
+    "DECOMPRESSING LOFI.SYS... OK",
+    "CONNECTING TO ETHER-REALM... CONNECTED.",
+    "SYNCING... AUDIO_STREAMS... READY.",
+    "USER_INTERFACE... READY.",
+    "SYSTEM BOOT COMPLETE.",
+  ];
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index < bootSequence.length) {
+          setLines(prev => [...prev, bootSequence[index]]);
+          index++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            setShowPrompt(true);
+            onFinished();
+          }, 500);
+        }
+      }, 300);
+      return () => clearInterval(interval);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [onFinished]);
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/70">
+       <div className="font-mono text-lg text-primary text-left p-4 max-w-xl w-full">
+         {lines.map((line, i) => (
+           <p key={i}>
+             <span className="text-accent">&gt;</span> {line}
+           </p>
+         ))}
+         {showPrompt && (
+            <p className="text-xl text-center mt-8 animate-pulse">
+                Click or Press any key to begin
+            </p>
+         )}
+       </div>
+    </div>
+  );
+};
+
+
 interface Station {
   name: string;
   id: string; // YouTube Video ID
@@ -52,6 +108,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
   const [imageUrl, setImageUrl] = useState("https://picsum.photos/1920/1080");
+  const [canStart, setCanStart] = useState(false);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
   
@@ -61,11 +118,10 @@ export default function Home() {
   };
 
   const handleFirstInteraction = useCallback(() => {
-    if (!isStarted) {
-      setIsStarted(true);
-      setIsPlaying(true);
-    }
-  }, [isStarted]);
+    if (!canStart || isStarted) return;
+    setIsStarted(true);
+    setIsPlaying(true);
+  }, [canStart, isStarted]);
   
   useEffect(() => {
     const handleInteraction = () => {
@@ -73,14 +129,15 @@ export default function Home() {
         window.removeEventListener('keydown', handleInteraction);
         window.removeEventListener('click', handleInteraction);
     }
-    window.addEventListener('keydown', handleInteraction);
-    window.addEventListener('click', handleInteraction);
-
+    if (canStart) {
+        window.addEventListener('keydown', handleInteraction);
+        window.addEventListener('click', handleInteraction);
+    }
     return () => {
       window.removeEventListener('keydown', handleInteraction);
       window.removeEventListener('click', handleInteraction);
     };
-  }, [handleFirstInteraction]);
+  }, [handleFirstInteraction, canStart]);
 
   useEffect(() => {
     const stations: Station[] = [
@@ -88,10 +145,10 @@ export default function Home() {
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
+    if(!isStarted) return;
     const initialListeners = Math.floor(Math.random() * 10) + 1;
     setListeners(initialListeners);
 
@@ -104,11 +161,12 @@ export default function Home() {
     }, 3000 + Math.random() * 2000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isStarted]);
   
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
     playerRef.current.setVolume(volume);
+    setIsLoading(false);
     if(isStarted && isPlaying) {
       playerRef.current.playVideo();
     }
@@ -129,7 +187,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (!isStarted || !playerRef.current) return;
+    if (!playerRef.current) return;
     if (isPlaying) {
       playerRef.current.playVideo();
     } else {
@@ -182,12 +240,7 @@ export default function Home() {
          />
         <div className="absolute inset-0 bg-purple-900/50 -z-10" />
 
-        {!isStarted && (
-           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/50 cursor-pointer" onClick={handleFirstInteraction} onKeyDown={handleFirstInteraction} tabIndex={0}>
-             <h1 className="text-4xl font-headline text-shadow-neon-accent mb-4 animate-pulse">FocusFlow Retro</h1>
-             <p className="text-lg">Click or Press any key to begin</p>
-           </div>
-        )}
+        {!isStarted && <TerminalLoader onFinished={() => setCanStart(true)} />}
 
         {isStarted && (
         <>
