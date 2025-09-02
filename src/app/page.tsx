@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, Volume2 } from 'lucide-react';
+import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, Volume2, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
@@ -11,30 +11,29 @@ const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
   return <div className="vhs-overlay fixed inset-0 pointer-events-none z-50" />;
 };
 
-const musicStreams = [
-  { name: "Lofi Hip Hop Radio - Beats to Study/Relax To", url: "https://stream.lofi.cafe/mp3" },
-  { name: "Chiptune Radio - 8-bit Music", url: "https://chiptune.shoutca.st:8000/stream" },
-  { name: "Plaza One - Vaporwave Radio", url: "https://radio.plaza.one/mp3" },
-];
+interface Station {
+  name: string;
+  url: string;
+}
 
-const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass }) => (
+const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
   <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm">
     <div className="max-w-7xl mx-auto flex items-center gap-4 text-white font-mono">
        <div className="flex items-center gap-2">
-        <Button onClick={togglePlay} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent">
+        <Button onClick={togglePlay} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent" disabled={isLoading}>
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
         </Button>
-        <Button onClick={nextTrack} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent">
+        <Button onClick={nextTrack} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent" disabled={isLoading}>
           <SkipForward size={20} />
         </Button>
       </div>
       <div className="flex items-center gap-2 w-32">
         <Volume2 className="text-primary" />
-        <Slider value={[volume]} onValueChange={(value) => setVolume(value[0])} max={1} step={0.05} />
+        <Slider value={[volume]} onValueChange={(value) => setVolume(value[0])} max={1} step={0.05} disabled={isLoading} />
       </div>
       <div className={`flex-grow flex items-center gap-2 ${glitchClass}`}>
-        <ListMusic size={20} className="text-primary" />
-        <p className="truncate">{currentTrack.name}</p>
+        {isLoading ? <Loader size={20} className="text-primary animate-spin" /> : <ListMusic size={20} className="text-primary" />}
+        <p className="truncate">{isLoading ? "Finding vibes..." : currentTrack?.name || "No station selected"}</p>
       </div>
     </div>
   </div>
@@ -43,12 +42,41 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [musicStreams, setMusicStreams] = useState<Station[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [glitchClass, setGlitchClass] = useState('');
   const [listeners, setListeners] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    async function fetchStations() {
+      setIsLoading(true);
+      try {
+        const response = await fetch('https://de1.api.radio-browser.info/json/stations/bytag/lofi');
+        const data = await response.json();
+        const stations: Station[] = data
+            .filter(station => station.url_resolved && station.codec === 'mp3')
+            .map(station => ({
+                name: station.name,
+                url: station.url_resolved,
+            }))
+            .slice(0, 20); // Limit to 20 stations
+        
+        if (stations.length > 0) {
+            setMusicStreams(stations);
+            setCurrentTrackIndex(0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch radio stations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchStations();
+  }, []);
 
   useEffect(() => {
     // Simulate listener count
@@ -67,17 +95,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (musicStreams.length > 0 && typeof window !== 'undefined') {
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      audioRef.current = new Audio(musicStreams[currentTrackIndex].url);
-      audioRef.current.volume = volume;
-      if (isPlaying) {
-        audioRef.current?.play().catch(e => console.error("Audio play failed:", e));
+      const currentTrack = musicStreams[currentTrackIndex];
+      if (currentTrack) {
+        audioRef.current = new Audio(currentTrack.url);
+        audioRef.current.volume = volume;
+        if (isPlaying) {
+          audioRef.current?.play().catch(e => console.error("Audio play failed:", e));
+        }
       }
     }
-  }, [currentTrackIndex]);
+  }, [currentTrackIndex, musicStreams]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -85,7 +116,10 @@ export default function Home() {
     }
   }, [volume]);
 
-  const togglePlay = () => setIsPlaying(prev => !prev);
+  const togglePlay = () => {
+    if (musicStreams.length === 0) return;
+    setIsPlaying(prev => !prev);
+  }
 
   useEffect(() => {
     if (isPlaying) {
@@ -96,6 +130,7 @@ export default function Home() {
   }, [isPlaying]);
 
   const nextTrack = () => {
+    if (musicStreams.length === 0) return;
     setGlitchClass('glitch-active');
     setTimeout(() => setGlitchClass(''), 300);
     setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
@@ -134,6 +169,7 @@ export default function Home() {
           volume={volume}
           setVolume={setVolume}
           glitchClass={glitchClass}
+          isLoading={isLoading}
         />
       </main>
     </>
