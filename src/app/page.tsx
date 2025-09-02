@@ -52,7 +52,7 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
             }
             return p + 2;
           });
-        }, 50);
+        }, 80);
       }
     }, 200);
 
