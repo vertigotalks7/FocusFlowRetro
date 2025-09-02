@@ -50,11 +50,11 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
               }, 500);
               return 100;
             }
-            return p + 2;
+            return p + 4;
           });
-        }, 80);
+        }, 50);
       }
-    }, 200);
+    }, 150);
 
     return () => {
       clearInterval(lineInterval);
