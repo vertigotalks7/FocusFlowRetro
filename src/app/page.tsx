@@ -168,7 +168,7 @@ export default function Home() {
   useEffect(() => {
     const stations: Station[] = [
       { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://picsum.photos/1920/1080?random=1', imageHint: 'morning sunrise' },
-      { name: 'Nightride - 1 A.M Study Session', id: 'UI5NKkW8acM', imageUrl: 'https://picsum.photos/1920/1080?random=2', imageHint: 'night city' },
+      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', imageUrl: 'https://picsum.photos/1920/1080?random=2', imageHint: 'coffee shop' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
