@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, Volume2, Loader } from 'lucide-react';
+import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, Volume2, Loader, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
@@ -41,15 +41,38 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
 
 
 export default function Home() {
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [musicStreams, setMusicStreams] = useState<Station[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [glitchClass, setGlitchClass] = useState('');
   const [listeners, setListeners] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStarted, setIsStarted] = useState(false);
+  const [imageUrl, setImageUrl] = useState("https://picsum.photos/1920/1080");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const updateImageUrl = () => {
+    // This will generate a new random image URL
+    const newImageUrl = `https://picsum.photos/1920/1080?random=${Math.random()}`;
+    setImageUrl(newImageUrl);
+  };
+
+  const handleFirstInteraction = useCallback(() => {
+    if (!isStarted) {
+      setIsStarted(true);
+      setIsPlaying(true);
+    }
+  }, [isStarted]);
+  
+  useEffect(() => {
+    window.addEventListener('keydown', handleFirstInteraction);
+    return () => {
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, [handleFirstInteraction]);
+
 
   useEffect(() => {
     async function fetchStations() {
@@ -125,6 +148,12 @@ export default function Home() {
 
   const togglePlay = () => {
     if (musicStreams.length === 0 || !audioRef.current) return;
+    
+    if(!isStarted){
+      handleFirstInteraction();
+      return;
+    }
+
     setIsPlaying(prev => !prev);
   }
 
@@ -145,43 +174,55 @@ export default function Home() {
     setGlitchClass('glitch-active');
     setTimeout(() => setGlitchClass(''), 300);
     setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
+    updateImageUrl();
   };
   
   return (
     <>
       <VhsOverlay enabled={true} />
-      <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary">
+      <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary" onClick={handleFirstInteraction}>
          <Image 
-          src="https://picsum.photos/1920/1080"
+          src={imageUrl}
           alt="Retro car interior view with palm trees"
           fill
           quality={85}
-          className="object-cover -z-10"
-          data-ai-hint="retro car interior"
+          className="object-cover -z-10 transition-opacity duration-1000"
+          key={imageUrl}
+          data-ai-hint="retro vaporwave"
          />
         <div className="absolute inset-0 bg-purple-900/50 -z-10" />
 
+        {!isStarted && (
+           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/50">
+             <h1 className="text-4xl font-headline text-shadow-neon-accent mb-4 animate-pulse">FocusFlow Retro</h1>
+             <p className="text-lg">Press any key to begin</p>
+           </div>
+        )}
 
-        <header className="flex justify-between items-center w-full max-w-7xl mx-auto p-4 text-sm">
-          <p>listening now {listeners}</p>
-          <div className="flex items-center gap-3">
-            <Share2 size={18} className="cursor-pointer hover:text-accent" />
-            <Facebook size={18} className="cursor-pointer hover:text-accent" />
-            <Twitter size={18} className="cursor-pointer hover:text-accent" />
-            <Heart size={18} className="cursor-pointer hover:text-accent" />
-          </div>
-        </header>
+        {isStarted && (
+        <>
+          <header className="flex justify-between items-center w-full max-w-7xl mx-auto p-4 text-sm">
+            <p>listening now {listeners}</p>
+            <div className="flex items-center gap-3">
+              <Share2 size={18} className="cursor-pointer hover:text-accent" />
+              <Facebook size={18} className="cursor-pointer hover:text-accent" />
+              <Twitter size={18} className="cursor-pointer hover:text-accent" />
+              <Heart size={18} className="cursor-pointer hover:text-accent" />
+            </div>
+          </header>
 
-        <MusicPlayer 
-          isPlaying={isPlaying}
-          togglePlay={togglePlay}
-          nextTrack={nextTrack}
-          currentTrack={musicStreams[currentTrackIndex]}
-          volume={volume}
-          setVolume={setVolume}
-          glitchClass={glitchClass}
-          isLoading={isLoading}
-        />
+          <MusicPlayer 
+            isPlaying={isPlaying}
+            togglePlay={togglePlay}
+            nextTrack={nextTrack}
+            currentTrack={musicStreams[currentTrackIndex]}
+            volume={volume}
+            setVolume={setVolume}
+            glitchClass={glitchClass}
+            isLoading={isLoading}
+          />
+        </>
+        )}
       </main>
     </>
   );
