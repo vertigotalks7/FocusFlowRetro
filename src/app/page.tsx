@@ -84,14 +84,10 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Lofi Girl - beats to relax/study to', id: 'jfKfPfyJRdk' },
-      { name: 'Chillhop Radio - jazzy & lofi hip hop beats', id: '5yx6BWlEVcY' },
-      { name: 'lofi hip hop radio - beats to sleep/chill to', id: 'rUxyKA_-grg' },
-      { name: 'The Bootleg Boy - 24/7 lofi hip hop radio', id: 'l7TxwBhtTUY'},
-      { name: 'Tokyo LosT Tracks', id: 'M1-e_i5L5aE' },
+      { name: 'SYNTHWAVE Radio 24/7', id: '2pDiJvbaw6E' },
     ];
     setMusicStreams(stations);
-    setCurrentTrackIndex(Math.floor(Math.random() * stations.length));
+    setCurrentTrackIndex(0);
     setIsLoading(false);
   }, []);
 
@@ -142,7 +138,7 @@ export default function Home() {
   }, [isPlaying, isStarted]);
 
   const nextTrack = () => {
-    if (musicStreams.length === 0) return;
+    if (musicStreams.length <= 1) return;
     setGlitchClass('glitch-active');
     setTimeout(() => setGlitchClass(''), 300);
     setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
