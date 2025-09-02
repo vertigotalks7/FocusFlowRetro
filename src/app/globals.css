@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 7%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 180 33% 55%;
-    --primary-foreground: 0 0% 7%;
+    --primary: 270 95% 90%;
+    --primary-foreground: 270 95% 20%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 52 74% 72%;
+    --accent: 270 95% 70%;
     --accent-foreground: 0 0% 7%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 180 33% 55%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 270 95% 80%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -32,25 +32,25 @@
   }
 
   .dark {
-    --background: 0 0% 7%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 180 33% 55%;
-    --primary-foreground: 0 0% 7%;
+    --primary: 270 95% 90%;
+    --primary-foreground: 270 95% 20%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 52 74% 72%;
+    --accent: 270 95% 70%;
     --accent-foreground: 0 0% 7%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 180 33% 55%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 270 95% 80%;
   }
 }
 
@@ -76,7 +76,7 @@
     height: 100%;
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
     z-index: 50;
-    background-size: 100% 3px, 4px 100%;
+    background-size: 100% 2px, 3px 100%;
     pointer-events: none;
     animation: vhs-flicker 0.15s infinite;
   }

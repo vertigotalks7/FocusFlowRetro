@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter, Space_Grotesk } from 'next/font/google';
+import { VT323, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 
-const fontBody = Inter({
+const fontBody = VT323({
   subsets: ['latin'],
   variable: '--font-body',
+  weight: '400',
 });
 
 const fontHeadline = Space_Grotesk({
