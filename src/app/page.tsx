@@ -5,6 +5,8 @@ import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, 
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
+import YouTube from 'react-youtube';
+import type { YouTubePlayer } from 'react-youtube';
 
 const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
   if (!enabled) return null;
@@ -13,7 +15,7 @@ const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
 
 interface Station {
   name: string;
-  url: string;
+  id: string; // YouTube Video ID
 }
 
 const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
@@ -29,7 +31,7 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
       </div>
       <div className="flex items-center gap-2 w-32">
         <Volume2 className="text-primary" />
-        <Slider value={[volume]} onValueChange={(value) => setVolume(value[0])} max={1} step={0.05} disabled={isLoading} />
+        <Slider value={[volume]} onValueChange={(value) => setVolume(value[0])} max={100} step={1} disabled={isLoading} />
       </div>
       <div className={`flex-grow flex items-center gap-2 ${glitchClass}`}>
         {isLoading ? <Loader size={20} className="text-primary animate-spin" /> : <ListMusic size={20} className="text-primary" />}
@@ -44,17 +46,16 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [musicStreams, setMusicStreams] = useState<Station[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(50);
   const [glitchClass, setGlitchClass] = useState('');
   const [listeners, setListeners] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
   const [imageUrl, setImageUrl] = useState("https://picsum.photos/1920/1080");
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playerRef = useRef<YouTubePlayer | null>(null);
   
   const updateImageUrl = () => {
-    // This will generate a new random image URL
     const newImageUrl = `https://picsum.photos/1920/1080?random=${Math.random()}`;
     setImageUrl(newImageUrl);
   };
@@ -67,20 +68,27 @@ export default function Home() {
   }, [isStarted]);
   
   useEffect(() => {
-    window.addEventListener('keydown', handleFirstInteraction);
+    const handleInteraction = () => {
+        handleFirstInteraction();
+        window.removeEventListener('keydown', handleInteraction);
+        window.removeEventListener('click', handleInteraction);
+    }
+    window.addEventListener('keydown', handleInteraction);
+    window.addEventListener('click', handleInteraction);
+
     return () => {
-      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('click', handleInteraction);
     };
   }, [handleFirstInteraction]);
 
-
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Lofi Girl - beats to relax/study to', url: 'https://stream.zeno.fm/f835fidaetpuv' },
-      { name: 'Chillhop Radio - jazzy & lofi hip hop beats', url: 'https://stream.zeno.fm/upt3dhjfo88uv' },
-      { name: 'lofi hip hop radio - beats to sleep/chill to', url: 'https://stream.zeno.fm/3614uhw84p8uv' },
-      { name: 'The Bootleg Boy - 24/7 lofi hip hop radio', url: 'https://stream.zeno.fm/1zwd365gretuv' },
-      { name: 'Radio Spinner - Lo-Fi', url: 'https://streams.radiospinner.com/lofi-hip-hop-free' },
+      { name: 'Lofi Girl - beats to relax/study to', id: 'jfKfPfyJRdk' },
+      { name: 'Chillhop Radio - jazzy & lofi hip hop beats', id: '5yx6BWlEVcY' },
+      { name: 'lofi hip hop radio - beats to sleep/chill to', id: 'rUxyKA_-grg' },
+      { name: 'The Bootleg Boy - 24/7 lofi hip hop radio', id: 'l7TxwBhtTUY'},
+      { name: 'Tokyo LosT Tracks', id: 'M1-e_i5L5aE' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(Math.floor(Math.random() * stations.length));
@@ -88,7 +96,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Simulate listener count
     const initialListeners = Math.floor(Math.random() * 10) + 1;
     setListeners(initialListeners);
 
@@ -102,59 +109,37 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (musicStreams.length > 0 && typeof window !== 'undefined') {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
-      const currentTrack = musicStreams[currentTrackIndex];
-      if (currentTrack) {
-        const audio = new Audio(currentTrack.url);
-        audio.volume = volume;
-        audioRef.current = audio;
-        
-        if (isPlaying) {
-          audio.play().catch(e => {
-            console.error("Audio play failed:", e);
-            // Autoplay was prevented.
-            setIsPlaying(false);
-          });
-        }
-      }
+  
+  const onPlayerReady = (event: { target: YouTubePlayer }) => {
+    playerRef.current = event.target;
+    playerRef.current.setVolume(volume);
+    if(isStarted && isPlaying) {
+      playerRef.current.playVideo();
     }
-  }, [currentTrackIndex, musicStreams]);
-
+  };
+  
   useEffect(() => {
-    if (audioRef.current) {
-        audioRef.current.volume = volume;
+    if (playerRef.current) {
+        playerRef.current.setVolume(volume);
     }
   }, [volume]);
-
+  
   const togglePlay = () => {
-    if (musicStreams.length === 0 || !audioRef.current) return;
-    
-    if(!isStarted){
+    if (!isStarted){
       handleFirstInteraction();
       return;
     }
-
     setIsPlaying(prev => !prev);
   }
 
   useEffect(() => {
-    if (!audioRef.current) return;
+    if (!playerRef.current) return;
     if (isPlaying) {
-      audioRef.current?.play().catch(e => {
-        console.error("Audio play failed:", e)
-        setIsPlaying(false);
-      });
+      playerRef.current.playVideo();
     } else {
-      audioRef.current?.pause();
+      playerRef.current.pauseVideo();
     }
-  }, [isPlaying]);
+  }, [isPlaying, isStarted]);
 
   const nextTrack = () => {
     if (musicStreams.length === 0) return;
@@ -164,10 +149,32 @@ export default function Home() {
     updateImageUrl();
   };
   
+  const currentStation = musicStreams[currentTrackIndex];
+
   return (
     <>
       <VhsOverlay enabled={true} />
-      <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary" onClick={handleFirstInteraction}>
+      <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary">
+         <div style={{ display: 'none' }}>
+           {currentStation && (
+              <YouTube
+                videoId={currentStation.id}
+                opts={{
+                  height: '0',
+                  width: '0',
+                  playerVars: {
+                    autoplay: isStarted ? 1 : 0,
+                  },
+                }}
+                onReady={onPlayerReady}
+                onStateChange={(e) => {
+                  if (e.data === 0) { // Video ended
+                     nextTrack();
+                  }
+                }}
+              />
+           )}
+         </div>
          <Image 
           src={imageUrl}
           alt="Retro car interior view with palm trees"
@@ -180,9 +187,9 @@ export default function Home() {
         <div className="absolute inset-0 bg-purple-900/50 -z-10" />
 
         {!isStarted && (
-           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/50">
+           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/50 cursor-pointer">
              <h1 className="text-4xl font-headline text-shadow-neon-accent mb-4 animate-pulse">FocusFlow Retro</h1>
-             <p className="text-lg">Press any key to begin</p>
+             <p className="text-lg">Click or Press any key to begin</p>
            </div>
         )}
 
