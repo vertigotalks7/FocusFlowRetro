@@ -363,7 +363,7 @@ export default function Home() {
 
         {isStarted && (
         <>
-          <header className="flex justify-between items-center w-full max-w-7xl mx-auto p-4 text-sm z-10">
+          <header className="flex justify-between items-center w-full max-w-7xl mx-auto p-4 text-sm z-10 mt-8">
             <p>listening now {listeners}</p>
             <div className="flex items-center gap-3">
               <Share2 size={18} className="cursor-pointer hover:text-accent" />
