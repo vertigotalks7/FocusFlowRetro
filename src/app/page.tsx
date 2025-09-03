@@ -229,6 +229,7 @@ export default function Home() {
 
   const nextTrack = () => {
     if (musicStreams.length <= 1) return;
+    setIsLoading(true);
     setGlitchClass('glitch-active');
     setTimeout(() => setGlitchClass(''), 300);
     setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
