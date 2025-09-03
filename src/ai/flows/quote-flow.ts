@@ -43,7 +43,13 @@ const quoteFlow = ai.defineFlow(
     name: 'quoteFlow',
   },
   async () => {
-    const {output} = await quotePrompt();
-    return output ?? '';
+    try {
+      const {output} = await quotePrompt();
+      return output ?? "The journey of a thousand miles begins with a single step.";
+    } catch (error) {
+      console.error("Error fetching AI quote:", error);
+      // Return a fallback quote if the AI service fails
+      return "The secret of getting ahead is getting started.";
+    }
   }
 );
