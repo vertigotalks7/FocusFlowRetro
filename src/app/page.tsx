@@ -165,13 +165,13 @@ export default function Home() {
       { 
         name: 'Morning Lofi', 
         id: 'jfKfPfyJRdk',
-        backgroundUrl: 'https://picsum.photos/1920/1080',
+        backgroundUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTRuNjRvYWk0bW9kdTdxdml3NTE0Zm9jMnVicmlkYnNpcXA4N2VxMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xWMPYx55WNhX136T0V/giphy.gif',
         backgroundType: 'image'
       },
       { 
         name: 'Cafe Lofi', 
         id: 'UI5NKkW8acM',
-        backgroundUrl: 'https://picsum.photos/1920/1081',
+        backgroundUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHJwY2I5a2ZidGt2NzV1cDI0bm9kaWcybXI2MW13ZmRpeXFrcm5ubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pVGsAWjzvXcZW4ZBTE/giphy.gif',
         backgroundType: 'image'
       },
     ];
@@ -280,7 +280,6 @@ export default function Home() {
                 layout="fill"
                 objectFit="cover"
                 unoptimized={currentStation.backgroundUrl.endsWith('.gif')}
-                data-ai-hint={currentStation.name === 'Morning Lofi' ? 'sunrise' : 'cafe'}
               />
           )}
         </div>
