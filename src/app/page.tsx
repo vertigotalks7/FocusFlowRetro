@@ -12,11 +12,19 @@ import { cn } from '@/lib/utils';
 import PomodoroTimer, { type TimerMode, TIMES } from '@/components/PomodoroTimer';
 import PomodoroProgress from '@/components/PomodoroProgress';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { getFocusQuote } from '@/ai/flows/quote-flow';
+import { getFocusQuote } from '@/ai/quote-flow';
 import FocusQuote from '@/components/FocusQuote';
 
 
-const TimerFinishedAlert = ({ open, onOpenChange, title, description, onConfirm }) => (
+interface TimerFinishedAlertProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+}
+
+const TimerFinishedAlert = ({ open, onOpenChange, title, description, onConfirm }: TimerFinishedAlertProps) => (
   <AlertDialog open={open} onOpenChange={onOpenChange}>
     <AlertDialogContent className="font-mono bg-black/80 border-primary/50 text-primary">
       <AlertDialogHeader>
@@ -139,7 +147,33 @@ const loadingMessages = [
   "Reticulating splines...",
 ];
 
-const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading, onPomodoroToggle, isPomodoroOpen, loadingMessage }) => (
+interface MusicPlayerProps {
+  isPlaying: boolean;
+  togglePlay: () => void;
+  nextTrack: () => void;
+  currentTrack: Station | undefined;
+  volume: number;
+  setVolume: (value: number) => void;
+  glitchClass: string;
+  isLoading: boolean;
+  onPomodoroToggle: () => void;
+  isPomodoroOpen: boolean;
+  loadingMessage: string;
+}
+
+const MusicPlayer = ({
+  isPlaying,
+  togglePlay,
+  nextTrack,
+  currentTrack,
+  volume,
+  setVolume,
+  glitchClass,
+  isLoading,
+  onPomodoroToggle,
+  isPomodoroOpen,
+  loadingMessage
+}: MusicPlayerProps) => (
   <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm z-20">
     <div className="max-w-7xl mx-auto flex items-center gap-4 text-white font-mono">
        <div className="flex items-center gap-2">
@@ -409,7 +443,7 @@ export default function Home() {
                   },
                 }}
                 onReady={onPlayerReady}
-                onStateChange={(e) => {
+                onStateChange={(e: { data: number; }) => {
                   if (e.data === 0) { // Video ended
                      nextTrack();
                   } else if (e.data === -1) { // Unstarted
