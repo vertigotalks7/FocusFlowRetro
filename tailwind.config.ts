@@ -100,5 +100,12 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('tailwindcss-filters')],
+  variants: {
+    extend: {
+      filter: ['responsive'],
+      saturate: ['responsive'],
+      contrast: ['responsive'],
+    },
+  },
 } satisfies Config;

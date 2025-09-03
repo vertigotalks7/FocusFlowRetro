@@ -255,7 +255,7 @@ export default function Home() {
               loop
               muted
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover filter saturate-150 contrast-125"
               src="https://cdn.pixabay.com/video/2024/12/19/247740_large.mp4"
             />
         </div>
