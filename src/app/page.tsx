@@ -11,6 +11,30 @@ import type { YouTubePlayer } from 'react-youtube';
 import { cn } from '@/lib/utils';
 import PomodoroTimer, { type TimerMode, TIMES } from '@/components/PomodoroTimer';
 import PomodoroProgress from '@/components/PomodoroProgress';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+
+const TimerFinishedAlert = ({ open, onOpenChange, title, description, onConfirm }) => (
+  <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialogContent className="font-mono bg-black/80 border-primary/50 text-primary">
+      <AlertDialogHeader>
+        <AlertDialogTitle className="text-accent text-2xl text-shadow-neon-accent">{title}</AlertDialogTitle>
+        <AlertDialogDescription className="text-primary/80 pt-2">
+          {description}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogAction 
+          onClick={onConfirm}
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Ok
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+);
+
 
 const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   const [lines, setLines] = useState<string[]>([]);
@@ -163,15 +187,9 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState(TIMES.work);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [workSessions, setWorkSessions] = useState(0);
+  const [isTimerFinished, setIsTimerFinished] = useState(false);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
-  const alarmRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      alarmRef.current = new Audio('/alarm.mp3');
-    }
-  }, []);
 
   const switchTimerMode = useCallback((newMode: TimerMode) => {
     setIsTimerActive(false);
@@ -186,21 +204,9 @@ export default function Home() {
       interval = setInterval(() => {
         setTimeLeft(t => t - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
-      if (alarmRef.current) {
-        alarmRef.current.play();
-      }
-      if (timerMode === 'work') {
-        const newWorkSessions = workSessions + 1;
-        setWorkSessions(newWorkSessions);
-        if (newWorkSessions % 4 === 0) {
-          switchTimerMode('longBreak');
-        } else {
-          switchTimerMode('shortBreak');
-        }
-      } else {
-        switchTimerMode('work');
-      }
+    } else if (timeLeft === 0 && isTimerActive) {
+        setIsTimerActive(false);
+        setIsTimerFinished(true);
     }
 
     return () => {
@@ -208,7 +214,22 @@ export default function Home() {
         clearInterval(interval);
       }
     };
-  }, [isTimerActive, timeLeft, timerMode, workSessions, switchTimerMode]);
+  }, [isTimerActive, timeLeft]);
+
+
+  const handleTimerCompletion = () => {
+    if (timerMode === 'work') {
+      const newWorkSessions = workSessions + 1;
+      setWorkSessions(newWorkSessions);
+      if (newWorkSessions % 4 === 0) {
+        switchTimerMode('longBreak');
+      } else {
+        switchTimerMode('shortBreak');
+      }
+    } else {
+      switchTimerMode('work');
+    }
+  }
 
   const toggleTimerActive = () => {
     setIsTimerActive(prev => !prev);
@@ -422,6 +443,17 @@ export default function Home() {
             toggleTimer={toggleTimerActive}
             resetTimer={resetTimer}
             workSessions={workSessions}
+          />
+
+          <TimerFinishedAlert 
+             open={isTimerFinished}
+             onOpenChange={setIsTimerFinished}
+             title={timerMode === 'work' ? 'Work Session Over' : 'Break Over'}
+             description={timerMode === 'work' ? 'Time for a break!' : 'Time to get back to work!'}
+             onConfirm={() => {
+                setIsTimerFinished(false);
+                handleTimerCompletion();
+             }}
           />
         </>
         )}
