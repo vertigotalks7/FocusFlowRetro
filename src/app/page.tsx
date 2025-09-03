@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import PomodoroTimer, { type TimerMode, TIMES } from '@/components/PomodoroTimer';
 import PomodoroProgress from '@/components/PomodoroProgress';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { getFocusQuote } from '@/ai/flows/quote-flow';
+import FocusQuote from '@/components/FocusQuote';
 
 
 const TimerFinishedAlert = ({ open, onOpenChange, title, description, onConfirm }) => (
@@ -188,6 +190,12 @@ export default function Home() {
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [workSessions, setWorkSessions] = useState(0);
   const [isTimerFinished, setIsTimerFinished] = useState(false);
+  const [finishedAlertContent, setFinishedAlertContent] = useState({ title: '', description: '' });
+
+  // AI Quote State
+  const [quote, setQuote] = useState('');
+  const [showQuote, setShowQuote] = useState(true);
+
 
   const playerRef = useRef<YouTubePlayer | null>(null);
 
@@ -217,16 +225,27 @@ export default function Home() {
   }, [isTimerActive, timeLeft]);
 
 
-  const handleTimerCompletion = () => {
+  const handleTimerCompletion = async () => {
     if (timerMode === 'work') {
       const newWorkSessions = workSessions + 1;
       setWorkSessions(newWorkSessions);
+
+      const generatedQuote = await getFocusQuote();
+      setFinishedAlertContent({
+        title: 'Work Session Over',
+        description: generatedQuote || 'Time for a break!',
+      });
+      
       if (newWorkSessions % 4 === 0) {
         switchTimerMode('longBreak');
       } else {
         switchTimerMode('shortBreak');
       }
     } else {
+      setFinishedAlertContent({
+        title: 'Break Over',
+        description: 'Time to get back to work!',
+      });
       switchTimerMode('work');
     }
   }
@@ -243,7 +262,7 @@ export default function Home() {
   const handleFirstInteraction = useCallback(() => {
     if (!canStart || isStarted) return;
     setIsStarted(true);
-    setIsPlaying(false);
+    // Don't auto-play on first interaction, wait for user to click play
   }, [canStart, isStarted]);
   
   useEffect(() => {
@@ -291,6 +310,7 @@ export default function Home() {
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -312,7 +332,6 @@ export default function Home() {
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
     playerRef.current.setVolume(volume);
-    setIsLoading(false);
     if(isStarted && isPlaying) {
       playerRef.current.playVideo();
     }
@@ -345,17 +364,35 @@ export default function Home() {
 
   const nextTrack = () => {
     if (musicStreams.length <= 1) return;
-    if (playerRef.current) {
-      playerRef.current.stopVideo();
-    }
     setIsLoading(true);
     setLoadingMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
     setGlitchClass('glitch-active');
-    setTimeout(() => setGlitchClass(''), 300);
-    setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
+    setTimeout(() => {
+       setGlitchClass('');
+       setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
+       setIsLoading(false);
+    }, 300);
   };
   
   const currentStation = musicStreams[currentTrackIndex];
+
+  // Fetch quotes periodically
+  useEffect(() => {
+    if (!isStarted) return;
+
+    const fetchQuote = async () => {
+      const newQuote = await getFocusQuote();
+      setShowQuote(false);
+      setTimeout(() => {
+        setQuote(newQuote);
+        setShowQuote(true);
+      }, 1000); // fade out duration
+    };
+
+    fetchQuote();
+    const quoteInterval = setInterval(fetchQuote, 10000);
+    return () => clearInterval(quoteInterval);
+  }, [isStarted]);
 
   return (
     <>
@@ -375,6 +412,8 @@ export default function Home() {
                 onStateChange={(e) => {
                   if (e.data === 0) { // Video ended
                      nextTrack();
+                  } else if (e.data === -1) { // Unstarted
+                    setIsLoading(false);
                   }
                 }}
                 key={currentStation.id}
@@ -418,6 +457,8 @@ export default function Home() {
             </div>
           </header>
           
+          <FocusQuote quote={quote} show={showQuote} />
+
           <PomodoroProgress 
             isOpen={!isPomodoroOpen}
             isActive={isTimerActive}
@@ -454,11 +495,10 @@ export default function Home() {
           <TimerFinishedAlert 
              open={isTimerFinished}
              onOpenChange={setIsTimerFinished}
-             title={timerMode === 'work' ? 'Work Session Over' : 'Break Over'}
-             description={timerMode === 'work' ? 'Time for a break!' : 'Time to get back to work!'}
+             title={finishedAlertContent.title}
+             description={finishedAlertContent.description}
              onConfirm={() => {
                 setIsTimerFinished(false);
-                handleTimerCompletion();
              }}
           />
         </>
