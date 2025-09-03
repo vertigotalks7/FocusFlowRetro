@@ -50,11 +50,11 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
               }, 200);
               return 100;
             }
-            return p + 10;
+            return p + 20;
           });
         }, 50);
       }
-    }, 50);
+    }, 100);
 
     return () => {
       clearInterval(lineInterval);
@@ -102,8 +102,6 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 interface Station {
   name: string;
   id: string; // YouTube Video ID for audio
-  imageUrl?: string;
-  imageHint?: string;
   type: 'video' | 'audio';
   videoId?: string; // YouTube Video ID for background video
 }
@@ -262,7 +260,7 @@ export default function Home() {
           {currentStation && currentStation.type === 'video' && currentStation.videoId && (
              <YouTube
                 videoId={currentStation.videoId}
-                className="absolute top-1/2 left-1/2 w-auto min-w-full min-h-full -translate-x-1/2 -translate-y-1/2"
+                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2"
                 opts={{
                   playerVars: {
                     autoplay: 1,
