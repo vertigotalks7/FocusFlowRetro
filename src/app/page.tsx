@@ -47,9 +47,9 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
             }
             return p + 20;
           });
-        }, 50);
+        }, 20);
       }
-    }, 50);
+    }, 20);
 
     return () => {
       clearInterval(lineInterval);
@@ -59,7 +59,7 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   const progressBar = `[${'█'.repeat(progress / 4)}${'░'.repeat(25 - progress / 4)}] ${progress}%`;
 
   return (
-    <div className="absolute inset-0 z-10 bg-black/70 flex items-end md:items-start justify-center md:justify-start p-4 md:p-8">
+    <div className="absolute inset-0 z-50 bg-black/70 flex items-end md:items-start justify-center md:justify-start p-4 md:p-8">
       <div className="font-mono text-sm md:text-base text-primary w-full max-w-lg md:max-w-2xl bg-black/50 p-4 rounded-lg border border-primary/20">
         <pre className="text-accent text-xs md:text-sm whitespace-pre-wrap mb-4">
 {`
@@ -97,7 +97,6 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 interface Station {
   name: string;
   id: string; // YouTube Video ID for audio
-  imageUrl: string;
 }
 
 const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
@@ -161,8 +160,8 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://picsum.photos/1920/1080' },
-      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', imageUrl: 'https://picsum.photos/1920/1081' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E' },
+      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -249,19 +248,17 @@ export default function Home() {
               />
            )}
          </div>
-
-         <div className="absolute inset-0 z-0 pointer-events-none">
-          {currentStation && (
-             <Image
-                src={currentStation.imageUrl}
-                alt="Background"
-                fill
-                className="object-cover"
-                data-ai-hint="ambience"
-              />
-          )}
-         </div>
-
+        
+        <div className="absolute inset-0 z-0 pointer-events-none w-full h-full">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              src="https://cdn.moewalls.com/videos/preview/2023/pixel-lofi-city-live-wallpaper-preview.mp4"
+            />
+        </div>
 
         {!isStarted && <TerminalLoader onFinished={() => setCanStart(true)} />}
 
