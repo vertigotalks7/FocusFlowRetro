@@ -167,8 +167,8 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://picsum.photos/1920/1080?random=1', imageHint: 'morning sunrise' },
-      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', imageUrl: 'https://picsum.photos/1920/1080?random=2', imageHint: 'coffee shop' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://media.tenor.com/W252qWk9j-4AAAAC/yup.gif', imageHint: 'yup' },
+      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', imageUrl: 'https://media.tenor.com/W252qWk9j-4AAAAC/yup.gif', imageHint: 'yup' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -265,9 +265,9 @@ export default function Home() {
             className="object-cover -z-10 transition-opacity duration-1000"
             key={currentStation.imageUrl}
             data-ai-hint={currentStation.imageHint}
+            unoptimized
           />
          )}
-        <div className="absolute inset-0 bg-purple-900/50 -z-10" />
 
         {!isStarted && <TerminalLoader onFinished={() => setCanStart(true)} />}
 
