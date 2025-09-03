@@ -38,6 +38,14 @@ const quotePrompt = ai.definePrompt({
   },
 });
 
+const fallbackQuotes = [
+  "The secret of getting ahead is getting started.",
+  "The journey of a thousand miles begins with a single step.",
+  "Either you run the day, or the day runs you.",
+  "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.",
+  "The key is not to prioritize what's on your schedule, but to schedule your priorities."
+];
+
 const quoteFlow = ai.defineFlow(
   {
     name: 'quoteFlow',
@@ -48,8 +56,8 @@ const quoteFlow = ai.defineFlow(
       return output ?? "The journey of a thousand miles begins with a single step.";
     } catch (error) {
       console.error("Error fetching AI quote:", error);
-      // Return a fallback quote if the AI service fails
-      return "The secret of getting ahead is getting started.";
+      // Return a random fallback quote if the AI service fails
+      return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
     }
   }
 );
