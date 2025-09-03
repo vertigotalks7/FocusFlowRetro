@@ -163,16 +163,16 @@ export default function Home() {
   useEffect(() => {
     const stations: Station[] = [
       { 
-        name: 'Retro Drive Lofi', 
+        name: 'Morning Lofi', 
         id: 'jfKfPfyJRdk',
-        backgroundUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NlbHZhaDU0a3ppMXU0MmE5bHZ5bzhvczExZG4zOTJ6c3E3cWFwZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xWMPYx55WNhX136T0V/giphy.gif',
+        backgroundUrl: 'https://picsum.photos/1920/1080',
         backgroundType: 'image'
       },
       { 
-        name: 'Snowy City Lofi', 
+        name: 'Cafe Lofi', 
         id: 'UI5NKkW8acM',
-        backgroundUrl: 'https://cdn.pixabay.com/video/2024/12/19/247740_large.mp4',
-        backgroundType: 'video'
+        backgroundUrl: 'https://picsum.photos/1920/1081',
+        backgroundType: 'image'
       },
     ];
     setMusicStreams(stations);
@@ -278,7 +278,8 @@ export default function Home() {
                 alt="Lofi background"
                 layout="fill"
                 objectFit="cover"
-                unoptimized
+                unoptimized={currentStation.backgroundUrl.endsWith('.gif')}
+                data-ai-hint={currentStation.name === 'Morning Lofi' ? 'sunrise' : 'cafe'}
               />
           )}
         </div>
