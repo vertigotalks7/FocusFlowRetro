@@ -101,13 +101,15 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 
 interface Station {
   name: string;
-  id: string; // YouTube Video ID
+  id: string; // YouTube Video ID for audio
   imageUrl: string;
   imageHint: string;
+  type: 'video' | 'image';
+  videoId?: string; // YouTube Video ID for background video
 }
 
 const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
-  <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm">
+  <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm z-20">
     <div className="max-w-7xl mx-auto flex items-center gap-4 text-white font-mono">
        <div className="flex items-center gap-2">
         <Button onClick={togglePlay} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent" disabled={isLoading}>
@@ -167,8 +169,8 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://media.tenor.com/W252qWk9j-4AAAAC/yup.gif', imageHint: 'yup' },
-      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', imageUrl: 'https://media.tenor.com/W252qWk9j-4AAAAC/yup.gif', imageHint: 'yup' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', type: 'video', videoId: 'lr9lvz1g7sc', imageUrl: '', imageHint: 'lofi car' },
+      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', type: 'image', imageUrl: 'https://media.tenor.com/W252qWk9j-4AAAAC/yup.gif', imageHint: 'yup' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -256,24 +258,48 @@ export default function Home() {
               />
            )}
          </div>
-         {currentStation && (
-          <Image 
-            src={currentStation.imageUrl}
-            alt="Retro background"
-            fill
-            quality={85}
-            className="object-cover transition-opacity duration-1000"
-            key={currentStation.imageUrl}
-            data-ai-hint={currentStation.imageHint}
-            unoptimized
-          />
-         )}
+
+         <div className="absolute inset-0 z-0">
+          {currentStation && currentStation.type === 'video' && currentStation.videoId && (
+             <YouTube
+                videoId={currentStation.videoId}
+                className="absolute top-1/2 left-1/2 w-auto min-w-full min-h-full -translate-x-1/2 -translate-y-1/2"
+                opts={{
+                  playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    loop: 1,
+                    playlist: currentStation.videoId, // Required for loop to work
+                    mute: 1,
+                    showinfo: 0,
+                    modestbranding: 1,
+                  },
+                }}
+                onReady={(event) => event.target.playVideo()}
+                key={currentStation.videoId}
+              />
+          )}
+
+          {currentStation && currentStation.type === 'image' && (
+            <Image 
+              src={currentStation.imageUrl}
+              alt="Retro background"
+              fill
+              quality={85}
+              className="object-cover transition-opacity duration-1000"
+              key={currentStation.imageUrl}
+              data-ai-hint={currentStation.imageHint}
+              unoptimized
+            />
+          )}
+         </div>
+
 
         {!isStarted && <TerminalLoader onFinished={() => setCanStart(true)} />}
 
         {isStarted && (
         <>
-          <header className="flex justify-between items-center w-full max-w-7xl mx-auto p-4 text-sm">
+          <header className="flex justify-between items-center w-full max-w-7xl mx-auto p-4 text-sm z-10">
             <p>listening now {listeners}</p>
             <div className="flex items-center gap-3">
               <Share2 size={18} className="cursor-pointer hover:text-accent" />
