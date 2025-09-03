@@ -164,7 +164,7 @@ export default function Home() {
     const stations: Station[] = [
       { 
         name: 'Retro Drive Lofi', 
-        id: '2pDiJvbaw6E',
+        id: 'jfKfPfyJRdk',
         backgroundUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NlbHZhaDU0a3ppMXU0MmE5bHZ5bzhvczExZG4zOTJ6c3E3cWFwZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xWMPYx55WNhX136T0V/giphy.gif',
         backgroundType: 'image'
       },
