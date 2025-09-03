@@ -104,7 +104,16 @@ interface Station {
   backgroundType: 'image' | 'video';
 }
 
-const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading, onPomodoroToggle, isPomodoroOpen }) => (
+const loadingMessages = [
+  "Finding vibes...",
+  "Tuning frequencies...",
+  "Syncing to the chillwave...",
+  "Booting up the soundscape...",
+  "Connecting to the Lofi-verse...",
+  "Reticulating splines...",
+];
+
+const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading, onPomodoroToggle, isPomodoroOpen, loadingMessage }) => (
   <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm z-20">
     <div className="max-w-7xl mx-auto flex items-center gap-4 text-white font-mono">
        <div className="flex items-center gap-2">
@@ -121,7 +130,7 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
       </div>
       <div className={cn("flex-grow flex items-center gap-2", glitchClass)}>
         {isLoading ? <Loader size={20} className="text-primary animate-spin" /> : <ListMusic size={20} className="text-primary" />}
-        <p className="truncate">{isLoading ? "Finding vibes..." : currentTrack?.name || "No station selected"}</p>
+        <p className="truncate">{isLoading ? loadingMessage : currentTrack?.name || "No station selected"}</p>
       </div>
        <Button 
         onClick={onPomodoroToggle} 
@@ -146,6 +155,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
   const [canStart, setCanStart] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
   
   // Pomodoro State
   const [isPomodoroOpen, setIsPomodoroOpen] = useState(false);
@@ -305,6 +315,7 @@ export default function Home() {
   const nextTrack = () => {
     if (musicStreams.length <= 1) return;
     setIsLoading(true);
+    setLoadingMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
     setGlitchClass('glitch-active');
     setTimeout(() => setGlitchClass(''), 300);
     setCurrentTrackIndex(prev => (prev + 1) % musicStreams.length);
@@ -391,6 +402,7 @@ export default function Home() {
             isLoading={isLoading}
             onPomodoroToggle={() => setIsPomodoroOpen(p => !p)}
             isPomodoroOpen={isPomodoroOpen}
+            loadingMessage={loadingMessage}
           />
 
           <PomodoroTimer
@@ -410,5 +422,3 @@ export default function Home() {
     </>
   );
 }
-
-    
