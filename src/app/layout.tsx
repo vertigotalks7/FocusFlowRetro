@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { VT323, Space_Grotesk } from 'next/font/google';
+import { VT323 } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
@@ -8,11 +8,6 @@ const fontBody = VT323({
   subsets: ['latin'],
   variable: '--font-body',
   weight: '400',
-});
-
-const fontHeadline = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-headline',
 });
 
 export const metadata: Metadata = {
@@ -27,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={cn("font-body antialiased", fontBody.variable, fontHeadline.variable)}>
+      <body className={cn("font-body antialiased", fontBody.variable)}>
         {children}
         <Toaster />
       </body>
