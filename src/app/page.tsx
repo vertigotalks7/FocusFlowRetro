@@ -47,14 +47,14 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
               setTimeout(() => {
                 setShowPrompt(true);
                 onFinished();
-              }, 500);
+              }, 200);
               return 100;
             }
-            return p + 4;
+            return p + 10;
           });
-        }, 80);
+        }, 50);
       }
-    }, 150);
+    }, 75);
 
     return () => {
       clearInterval(lineInterval);
