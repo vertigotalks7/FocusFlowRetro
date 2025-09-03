@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -8,7 +9,8 @@ import Image from 'next/image';
 import YouTube from 'react-youtube';
 import type { YouTubePlayer } from 'react-youtube';
 import { cn } from '@/lib/utils';
-import PomodoroTimer from '@/components/PomodoroTimer';
+import PomodoroTimer, { type TimerMode, TIMES } from '@/components/PomodoroTimer';
+import PomodoroProgress from '@/components/PomodoroProgress';
 
 const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   const [lines, setLines] = useState<string[]>([]);
@@ -144,14 +146,73 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
   const [canStart, setCanStart] = useState(false);
+  
+  // Pomodoro State
   const [isPomodoroOpen, setIsPomodoroOpen] = useState(false);
+  const [timerMode, setTimerMode] = useState<TimerMode>('work');
+  const [timeLeft, setTimeLeft] = useState(TIMES.work);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+  const [workSessions, setWorkSessions] = useState(0);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
+  const alarmRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      alarmRef.current = new Audio('/alarm.mp3');
+    }
+  }, []);
+
+  const switchTimerMode = useCallback((newMode: TimerMode) => {
+    setIsTimerActive(false);
+    setTimerMode(newMode);
+    setTimeLeft(TIMES[newMode]);
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isTimerActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(t => t - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      if (alarmRef.current) {
+        alarmRef.current.play();
+      }
+      if (timerMode === 'work') {
+        const newWorkSessions = workSessions + 1;
+        setWorkSessions(newWorkSessions);
+        if (newWorkSessions % 4 === 0) {
+          switchTimerMode('longBreak');
+        } else {
+          switchTimerMode('shortBreak');
+        }
+      } else {
+        switchTimerMode('work');
+      }
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isTimerActive, timeLeft, timerMode, workSessions, switchTimerMode]);
+
+  const toggleTimerActive = () => {
+    setIsTimerActive(prev => !prev);
+  };
+
+  const resetTimer = () => {
+    setIsTimerActive(false);
+    setTimeLeft(TIMES[timerMode]);
+  };
 
   const handleFirstInteraction = useCallback(() => {
     if (!canStart || isStarted) return;
     setIsStarted(true);
-    setIsPlaying(false); // Explicitly set to false, play is manual
+    setIsPlaying(false);
   }, [canStart, isStarted]);
   
   useEffect(() => {
@@ -311,6 +372,13 @@ export default function Home() {
               <Heart size={18} className="cursor-pointer hover:text-accent" />
             </div>
           </header>
+          
+          <PomodoroProgress 
+            isOpen={!isPomodoroOpen}
+            isActive={isTimerActive}
+            timeLeft={timeLeft}
+            totalTime={TIMES[timerMode]}
+          />
 
           <MusicPlayer 
             isPlaying={isPlaying}
@@ -325,10 +393,22 @@ export default function Home() {
             isPomodoroOpen={isPomodoroOpen}
           />
 
-          <PomodoroTimer isOpen={isPomodoroOpen} />
+          <PomodoroTimer
+            isOpen={isPomodoroOpen}
+            onClose={() => setIsPomodoroOpen(false)}
+            mode={timerMode}
+            setMode={switchTimerMode}
+            timeLeft={timeLeft}
+            isActive={isTimerActive}
+            toggleTimer={toggleTimerActive}
+            resetTimer={resetTimer}
+            workSessions={workSessions}
+          />
         </>
         )}
       </main>
     </>
   );
 }
+
+    
