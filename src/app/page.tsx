@@ -233,7 +233,7 @@ export default function Home() {
 
   return (
     <>
-      <VhsOverlay enabled={true} />
+      <VhsOverlay enabled={false} />
       <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary">
          <div style={{ display: 'none' }}>
            {currentStation && (
