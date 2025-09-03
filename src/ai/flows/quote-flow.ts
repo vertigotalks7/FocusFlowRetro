@@ -15,7 +15,7 @@ export async function getFocusQuote(): Promise<string> {
 const quotePrompt = ai.definePrompt({
   name: 'quotePrompt',
   output: {schema: z.string().describe('A short, inspirational quote about focus.')},
-  prompt: `generate inspirational quotes`,
+  prompt: `generate a short, inspirational quote about focus`,
   config: {
     safetySettings: [
       {
