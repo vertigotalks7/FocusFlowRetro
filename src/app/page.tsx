@@ -97,6 +97,8 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 interface Station {
   name: string;
   id: string; // YouTube Video ID for audio
+  backgroundUrl: string;
+  backgroundType: 'image' | 'video';
 }
 
 const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
@@ -160,8 +162,18 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E' },
-      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM' },
+      { 
+        name: 'Retro Drive Lofi', 
+        id: '2pDiJvbaw6E',
+        backgroundUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NlbHZhaDU0a3ppMXU0MmE5bHZ5bzhvczExZG4zOTJ6c3E3cWFwZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xWMPYx55WNhX136T0V/giphy.gif',
+        backgroundType: 'image'
+      },
+      { 
+        name: 'Snowy City Lofi', 
+        id: 'UI5NKkW8acM',
+        backgroundUrl: 'https://cdn.pixabay.com/video/2024/12/19/247740_large.mp4',
+        backgroundType: 'video'
+      },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -250,14 +262,25 @@ export default function Home() {
          </div>
         
         <div className="absolute inset-0 z-0 pointer-events-none w-full h-full">
+          {currentStation?.backgroundType === 'video' ? (
             <video
+              key={currentStation.backgroundUrl}
               autoPlay
               loop
               muted
               playsInline
               className="w-full h-full object-cover"
-              src="https://cdn.pixabay.com/video/2024/12/19/247740_large.mp4"
+              src={currentStation.backgroundUrl}
             />
+          ) : currentStation && (
+             <Image
+                src={currentStation.backgroundUrl}
+                alt="Lofi background"
+                layout="fill"
+                objectFit="cover"
+                unoptimized
+              />
+          )}
         </div>
 
         {!isStarted && <TerminalLoader onFinished={() => setCanStart(true)} />}
