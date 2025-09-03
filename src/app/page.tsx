@@ -102,7 +102,7 @@ interface Station {
   backgroundType: 'image' | 'video';
 }
 
-const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading, onPomodoroToggle }) => (
+const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading, onPomodoroToggle, isPomodoroOpen }) => (
   <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm z-20">
     <div className="max-w-7xl mx-auto flex items-center gap-4 text-white font-mono">
        <div className="flex items-center gap-2">
@@ -121,8 +121,13 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
         {isLoading ? <Loader size={20} className="text-primary animate-spin" /> : <ListMusic size={20} className="text-primary" />}
         <p className="truncate">{isLoading ? "Finding vibes..." : currentTrack?.name || "No station selected"}</p>
       </div>
-       <Button onClick={onPomodoroToggle} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent">
-          <Bell size={20} />
+       <Button 
+        onClick={onPomodoroToggle} 
+        size="icon" 
+        variant="secondary" 
+        className="w-8 h-8 text-primary bg-primary/10 hover:bg-primary/20"
+      >
+          <Bell size={20} className={cn(isPomodoroOpen && "icon-shadow-neon-primary")} />
         </Button>
     </div>
   </div>
@@ -146,7 +151,7 @@ export default function Home() {
   const handleFirstInteraction = useCallback(() => {
     if (!canStart || isStarted) return;
     setIsStarted(true);
-    setIsPlaying(false);
+    setIsPlaying(false); // Explicitly set to false, play is manual
   }, [canStart, isStarted]);
   
   useEffect(() => {
@@ -317,6 +322,7 @@ export default function Home() {
             glitchClass={glitchClass}
             isLoading={isLoading}
             onPomodoroToggle={() => setIsPomodoroOpen(p => !p)}
+            isPomodoroOpen={isPomodoroOpen}
           />
 
           <PomodoroTimer isOpen={isPomodoroOpen} />
