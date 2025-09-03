@@ -255,6 +255,12 @@ export default function Home() {
         backgroundUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHJwY2I5a2ZidGt2NzV1cDI0bm9kaWcybXI2MW13ZmRpeXFrcm5ubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pVGsAWjzvXcZW4ZBTE/giphy.gif',
         backgroundType: 'image'
       },
+      {
+        name: 'waterfall stream flow',
+        id: 'qHXFLsnKDq0',
+        backgroundUrl: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjh1ZnVxZmw1ZHM4bzNjNmNmbzNwZGZvZW9zMHNucDJmcTd2NTQ3aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JUwa2qSoTwcxv0gFJh/giphy.gif',
+        backgroundType: 'image'
+      }
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -278,9 +284,7 @@ export default function Home() {
   
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
-    if (playerRef.current) {
-        playerRef.current.setVolume(volume);
-    }
+    playerRef.current.setVolume(volume);
     setIsLoading(false);
     if(isStarted && isPlaying) {
       playerRef.current.playVideo();
@@ -314,6 +318,9 @@ export default function Home() {
 
   const nextTrack = () => {
     if (musicStreams.length <= 1) return;
+    if (playerRef.current) {
+      playerRef.current.stopVideo();
+    }
     setIsLoading(true);
     setLoadingMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
     setGlitchClass('glitch-active');
