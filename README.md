@@ -2,8 +2,7 @@
 
 A retro-futuristic, terminal-themed Lofi music player combined with a Pomodoro timer and AI-generated focus quotes to create the ultimate productivity and relaxation soundscape.
 
-./screenshot/image.png
-
+![Screenshot](./screenshot/image.png )
 ## ✨ Features
 
 * **🎶 Lofi Music Radio:** Cycles through multiple ambient and Lofi music stations powered by YouTube streams.
