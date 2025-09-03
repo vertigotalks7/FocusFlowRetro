@@ -102,9 +102,9 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 interface Station {
   name: string;
   id: string; // YouTube Video ID for audio
-  imageUrl: string;
-  imageHint: string;
-  type: 'video' | 'image';
+  imageUrl?: string;
+  imageHint?: string;
+  type: 'video' | 'audio';
   videoId?: string; // YouTube Video ID for background video
 }
 
@@ -169,8 +169,8 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', type: 'video', videoId: 'lr9lvz1g7sc', imageUrl: '', imageHint: 'lofi car' },
-      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', type: 'image', imageUrl: 'https://media.tenor.com/W252qWk9j-4AAAAC/yup.gif', imageHint: 'yup' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', type: 'video', videoId: 'lr9lvz1g7sc' },
+      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', type: 'audio' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -235,8 +235,7 @@ export default function Home() {
 
   return (
     <>
-      <VhsOverlay enabled={false} />
-      <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary">
+      <main className="min-h-screen flex flex-col relative overflow-hidden font-mono text-primary bg-black">
          <div style={{ display: 'none' }}>
            {currentStation && (
               <YouTube
@@ -259,7 +258,7 @@ export default function Home() {
            )}
          </div>
 
-         <div className="absolute inset-0 z-0">
+         <div className="absolute inset-0 z-0 pointer-events-none">
           {currentStation && currentStation.type === 'video' && currentStation.videoId && (
              <YouTube
                 videoId={currentStation.videoId}
@@ -273,24 +272,12 @@ export default function Home() {
                     mute: 1,
                     showinfo: 0,
                     modestbranding: 1,
+                    playsinline: 1,
                   },
                 }}
                 onReady={(event) => event.target.playVideo()}
                 key={currentStation.videoId}
               />
-          )}
-
-          {currentStation && currentStation.type === 'image' && (
-            <Image 
-              src={currentStation.imageUrl}
-              alt="Retro background"
-              fill
-              quality={85}
-              className="object-cover transition-opacity duration-1000"
-              key={currentStation.imageUrl}
-              data-ai-hint={currentStation.imageHint}
-              unoptimized
-            />
           )}
          </div>
 
