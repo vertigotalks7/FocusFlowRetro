@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, Volume2, Loader } from 'lucide-react';
+import { Share2, Facebook, Twitter, Heart, ListMusic, Play, Pause, SkipForward, Volume2, Loader, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
 import YouTube from 'react-youtube';
 import type { YouTubePlayer } from 'react-youtube';
 import { cn } from '@/lib/utils';
+import PomodoroTimer from '@/components/PomodoroTimer';
 
 const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   const [lines, setLines] = useState<string[]>([]);
@@ -101,7 +102,7 @@ interface Station {
   backgroundType: 'image' | 'video';
 }
 
-const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
+const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading, onPomodoroToggle }) => (
   <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm text-sm z-20">
     <div className="max-w-7xl mx-auto flex items-center gap-4 text-white font-mono">
        <div className="flex items-center gap-2">
@@ -120,6 +121,9 @@ const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, s
         {isLoading ? <Loader size={20} className="text-primary animate-spin" /> : <ListMusic size={20} className="text-primary" />}
         <p className="truncate">{isLoading ? "Finding vibes..." : currentTrack?.name || "No station selected"}</p>
       </div>
+       <Button onClick={onPomodoroToggle} size="icon" variant="ghost" className="w-8 h-8 text-primary hover:text-accent-foreground hover:bg-accent">
+          <Bell size={20} />
+        </Button>
     </div>
   </div>
 );
@@ -135,13 +139,14 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
   const [canStart, setCanStart] = useState(false);
+  const [isPomodoroOpen, setIsPomodoroOpen] = useState(false);
 
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   const handleFirstInteraction = useCallback(() => {
     if (!canStart || isStarted) return;
     setIsStarted(true);
-    setIsPlaying(true);
+    setIsPlaying(false);
   }, [canStart, isStarted]);
   
   useEffect(() => {
@@ -197,7 +202,9 @@ export default function Home() {
   
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
-    playerRef.current.setVolume(volume);
+    if (playerRef.current) {
+        playerRef.current.setVolume(volume);
+    }
     setIsLoading(false);
     if(isStarted && isPlaying) {
       playerRef.current.playVideo();
@@ -213,8 +220,10 @@ export default function Home() {
   const togglePlay = () => {
     if (!isStarted){
       handleFirstInteraction();
+      setIsPlaying(true);
       return;
     }
+    if (!playerRef.current) return;
     setIsPlaying(prev => !prev);
   }
 
@@ -248,7 +257,7 @@ export default function Home() {
                   height: '0',
                   width: '0',
                   playerVars: {
-                    autoplay: isStarted ? 1 : 0,
+                    autoplay: (isStarted && isPlaying) ? 1 : 0,
                   },
                 }}
                 onReady={onPlayerReady}
@@ -307,7 +316,10 @@ export default function Home() {
             setVolume={setVolume}
             glitchClass={glitchClass}
             isLoading={isLoading}
+            onPomodoroToggle={() => setIsPomodoroOpen(p => !p)}
           />
+
+          <PomodoroTimer isOpen={isPomodoroOpen} />
         </>
         )}
       </main>
