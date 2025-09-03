@@ -54,7 +54,7 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
           });
         }, 50);
       }
-    }, 75);
+    }, 50);
 
     return () => {
       clearInterval(lineInterval);
