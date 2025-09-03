@@ -256,7 +256,7 @@ export default function Home() {
               muted
               playsInline
               className="w-full h-full object-cover"
-              src="https://cdn.moewalls.com/videos/preview/2023/pixel-lofi-city-live-wallpaper-preview.mp4"
+              src="https://cdn.pixabay.com/video/2024/12/19/247740_large.mp4"
             />
         </div>
 
