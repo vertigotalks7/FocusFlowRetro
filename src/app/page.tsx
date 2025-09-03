@@ -9,11 +9,6 @@ import YouTube from 'react-youtube';
 import type { YouTubePlayer } from 'react-youtube';
 import { cn } from '@/lib/utils';
 
-const VhsOverlay = ({ enabled }: { enabled: boolean }) => {
-  if (!enabled) return null;
-  return <div className="vhs-overlay fixed inset-0 pointer-events-none z-50" />;
-};
-
 const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
   const [lines, setLines] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
@@ -54,7 +49,7 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
           });
         }, 50);
       }
-    }, 100);
+    }, 50);
 
     return () => {
       clearInterval(lineInterval);
@@ -102,8 +97,7 @@ const TerminalLoader = ({ onFinished }: { onFinished: () => void }) => {
 interface Station {
   name: string;
   id: string; // YouTube Video ID for audio
-  type: 'video' | 'audio';
-  videoId?: string; // YouTube Video ID for background video
+  imageUrl: string;
 }
 
 const MusicPlayer = ({ isPlaying, togglePlay, nextTrack, currentTrack, volume, setVolume, glitchClass, isLoading }) => (
@@ -167,8 +161,8 @@ export default function Home() {
 
   useEffect(() => {
     const stations: Station[] = [
-      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', type: 'video', videoId: 'lr9lvz1g7sc' },
-      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', type: 'audio' },
+      { name: 'Morning Lofi Songs For Morning Energy & Peaceful Mind', id: '2pDiJvbaw6E', imageUrl: 'https://picsum.photos/1920/1080' },
+      { name: 'Coffee Shop Radio ☕ - 24/7 Chill Lo-Fi & Jazzy Beats', id: 'UI5NKkW8acM', imageUrl: 'https://picsum.photos/1920/1081' },
     ];
     setMusicStreams(stations);
     setCurrentTrackIndex(0);
@@ -257,24 +251,13 @@ export default function Home() {
          </div>
 
          <div className="absolute inset-0 z-0 pointer-events-none">
-          {currentStation && currentStation.type === 'video' && currentStation.videoId && (
-             <YouTube
-                videoId={currentStation.videoId}
-                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2"
-                opts={{
-                  playerVars: {
-                    autoplay: 1,
-                    controls: 0,
-                    loop: 1,
-                    playlist: currentStation.videoId, // Required for loop to work
-                    mute: 1,
-                    showinfo: 0,
-                    modestbranding: 1,
-                    playsinline: 1,
-                  },
-                }}
-                onReady={(event) => event.target.playVideo()}
-                key={currentStation.videoId}
+          {currentStation && (
+             <Image
+                src={currentStation.imageUrl}
+                alt="Background"
+                fill
+                className="object-cover"
+                data-ai-hint="ambience"
               />
           )}
          </div>
