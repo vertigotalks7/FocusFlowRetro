@@ -281,6 +281,12 @@ export default function Home() {
         id: 'qHXFLsnKDq0',
         backgroundUrl: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjh1ZnVxZmw1ZHM4bzNjNmNmbzNwZGZvZW9zMHNucDJmcTd2NTQ3aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JUwa2qSoTwcxv0gFJh/giphy.gif',
         backgroundType: 'image'
+      },
+      {
+        name: 'baroque classical music',
+        id: '2gO1v2GPMFk',
+        backgroundUrl: 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGZmdmx0YjlrdjV0Z3J2MXhvOHV0eXVpanl0anhoMzB6eWllejNnaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/1yld7nW3oQ2IyRubUm/giphy.gif',
+        backgroundType: 'image'
       }
     ];
     setMusicStreams(stations);
