@@ -52,12 +52,17 @@ const quoteFlow = ai.defineFlow(
   },
   async () => {
     try {
+      console.log("Attempting to fetch quote from Gemini API...");
       const {output} = await quotePrompt();
-      return output ?? "The journey of a thousand miles begins with a single step.";
+      const quote = output ?? "The journey of a thousand miles begins with a single step.";
+      console.log("Successfully fetched quote:", quote);
+      return quote;
     } catch (error) {
-      console.error("Error fetching AI quote:", error);
+      console.error("Error fetching AI quote, using fallback:", error);
       // Return a random fallback quote if the AI service fails
-      return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+      const fallback = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+      console.log("Using fallback quote:", fallback);
+      return fallback;
     }
   }
 );
