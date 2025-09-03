@@ -262,7 +262,7 @@ export default function Home() {
             alt="Retro background"
             fill
             quality={85}
-            className="object-cover -z-10 transition-opacity duration-1000"
+            className="object-cover transition-opacity duration-1000"
             key={currentStation.imageUrl}
             data-ai-hint={currentStation.imageHint}
             unoptimized
