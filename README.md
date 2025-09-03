@@ -1,4 +1,4 @@
-# FocusFlow System v1.9.8.4
+# FocusFlow Retro
 
 A retro-futuristic, terminal-themed Lofi music player combined with a Pomodoro timer and AI-generated focus quotes to create the ultimate productivity and relaxation soundscape.
 
